@@ -6,8 +6,8 @@ const db = mysql.createConnection({
   port: 3306,
   user: 'root',
   password: 'password',
-  database: 'courses_db', // Add the database name here
-});
+  database: 'company_db', // Add the database name here
+}); 
 
 function viewAllDepartments() {
   // Query to get all departments
