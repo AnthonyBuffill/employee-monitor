@@ -89,7 +89,7 @@ function addRole() {
         const query = 'INSERT INTO role (title, salary, department_ID) VALUES (?, ?, ?)';
         db.query(query, [answers.roleName, answers.roleSalary, answers.departmentID], (err) => {
           if (err) throw err;
-          console.log('Role added successfully!');
+          console.info('Role added successfully!');
           startApp();
         });
       });
@@ -178,11 +178,11 @@ function startApp() {
           addEmployee();
           break;
         case 'exit':
-          console.log('Exiting the application. Goodbye!');
+          console.info('Exiting the application. Goodbye!');
           process.exit(0);
           break;
         default:
-          console.log('Invalid option. Please try again.');
+          console.error('Invalid option. Please try again.');
           startApp();
       }
     });
