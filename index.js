@@ -6,7 +6,7 @@ const db = mysql.createConnection({
   port: 3306,
   user: 'root',
   password: 'password',
-  database: 'company_db', // Add the database name here
+  database: 'company_db', 
 }); 
 
 function viewAllDepartments() {
@@ -20,7 +20,7 @@ function viewAllDepartments() {
 }
 
 function viewAllRoles() {
-  // Query to get all roles with department information
+  // Query to get all roles with department info
   const query = 'SELECT role.id, title, salary, department.name AS department FROM role JOIN department ON role.department_ID = department.id';
   db.query(query, (err, roles) => {
     if (err) throw err;
@@ -30,7 +30,7 @@ function viewAllRoles() {
 }
 
 function viewAllEmployees() {
-  // Query to get all employees with role, department, and manager information
+  // Query to get all employees, their role, department, and manager info
   const query = 'SELECT employee.id, first_name, last_name, title, department.name AS department, salary, manager_ID FROM employee JOIN role ON employee.role_ID = role.id JOIN department ON role.department_ID = department.id';
   db.query(query, (err, employees) => {
     if (err) throw err;
@@ -60,7 +60,7 @@ function addDepartment() {
 }
 
 function addRole() {
-  // Query to get department names for choices
+  // Query to get department name choices
   const departmentQuery = 'SELECT * FROM department';
   db.query(departmentQuery, (err, departments) => {
     if (err) throw err;
@@ -97,7 +97,7 @@ function addRole() {
 }
 
 function addEmployee() {
-  // Query to get role names for choices
+  // Query to get choices of roles by name
   const roleQuery = 'SELECT * FROM role';
   db.query(roleQuery, (err, roles) => {
     if (err) throw err;
@@ -138,6 +138,55 @@ function addEmployee() {
   });
 }
 
+function updateEmployeeRole() {
+  // Query to get employee names for choices
+  const employeeQuery = 'SELECT * FROM employee';
+  db.query(employeeQuery, (err, employees) => {
+    if (err) throw err;
+
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          message: 'Choose the employee whose role you want to update:',
+          name: 'employeeID',
+          choices: employees.map((employee) => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
+        },
+      ])
+      .then((answers) => {
+        const selectedEmployeeID = answers.employeeID;
+
+        // Query to get role names for choices
+        const roleQuery = 'SELECT * FROM role';
+        db.query(roleQuery, (err, roles) => {
+          if (err) throw err;
+
+          inquirer
+            .prompt([
+              {
+                type: 'list',
+                message: 'Choose the new role for the employee:',
+                name: 'newRoleID',
+                choices: roles.map((role) => ({ name: role.title, value: role.id })),
+              },
+            ])
+            .then((roleAnswer) => {
+              const newRoleID = roleAnswer.newRoleID;
+
+              // Query to update an employees role
+              const updateQuery = 'UPDATE employee SET role_ID = ? WHERE id = ?';
+              db.query(updateQuery, [newRoleID, selectedEmployeeID], (err) => {
+                if (err) throw err;
+                console.log('Employee role updated successfully!');
+                startApp();
+              });
+            });
+        });
+      });
+  });
+}
+
+
 function startApp() {
   inquirer
     .prompt([
@@ -162,21 +211,31 @@ function startApp() {
         case 'view all departments':
           viewAllDepartments();
           break;
+        
         case 'view all roles':
           viewAllRoles();
           break;
+        
         case 'view all employees':
           viewAllEmployees();
           break;
+        
         case 'add a department':
           addDepartment();
           break;
+        
         case 'add a role':
           addRole();
           break;
+       
         case 'add an employee':
           addEmployee();
           break;
+        
+        case 'update an employee role':
+            updateEmployeeRole();
+            break;
+       
         case 'exit':
           console.info('Exiting the application. Goodbye!');
           process.exit(0);
@@ -188,5 +247,4 @@ function startApp() {
     });
 }
 
-// Initial call to start the application
 startApp();
